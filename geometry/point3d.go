@@ -1,6 +1,7 @@
 package geometry
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -49,4 +50,8 @@ func calcDistance3d[T any](p1, p2 point3d, result func(d1, d2, d3 float64) T) T 
 	yDistance := math.Abs(float64(p1.y - p2.y))
 	zDistance := math.Abs(float64(p1.z - p2.z))
 	return result(xDistance, yDistance, zDistance)
+}
+
+func (p point3d) String() string {
+	return fmt.Sprintf("x: %d, y: %d, z: %d", p.x, p.y, p.z)
 }
