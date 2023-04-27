@@ -1,6 +1,8 @@
 package geometry
 
-import "math"
+import (
+	"math"
+)
 
 type point3d struct {
 	x, y, z int
@@ -31,15 +33,20 @@ func (p point3d) Multiply(n int) point3d {
 }
 
 func (p point3d) AirDistanceTo(other point3d) float64 {
-	xDistance := math.Abs(float64(other.x - p.x))
-	yDistance := math.Abs(float64(other.y - p.y))
-	zDistance := math.Abs(float64(other.z - p.z))
-	return math.Sqrt(math.Pow(xDistance, 2) + math.Pow(yDistance, 2) + math.Pow(zDistance, 2))
+	return calcDistance(p, other, func(d1, d2, d3 float64) float64 {
+		return math.Sqrt(math.Pow(d1, 2) + math.Pow(d2, 2) + math.Pow(d3, 2))
+	})
 }
 
 func (p point3d) ManhattenDistanceTo(other point3d) uint {
-	xDistance := math.Abs(float64(other.x - p.x))
-	yDistance := math.Abs(float64(other.y - p.y))
-	zDistance := math.Abs(float64(other.z - p.z))
-	return uint(xDistance + yDistance + zDistance)
+	return calcDistance(p, other, func(d1, d2, d3 float64) uint {
+		return uint(d1 + d2 + d3)
+	})
+}
+
+func calcDistance[T any](p1, p2 point3d, result func(d1, d2, d3 float64) T) T {
+	xDistance := math.Abs(float64(p1.x - p2.x))
+	yDistance := math.Abs(float64(p1.y - p2.y))
+	zDistance := math.Abs(float64(p1.z - p2.z))
+	return result(xDistance, yDistance, zDistance)
 }
