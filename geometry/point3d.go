@@ -33,18 +33,18 @@ func (p point3d) Multiply(n int) point3d {
 }
 
 func (p point3d) AirDistanceTo(other point3d) float64 {
-	return calcDistance(p, other, func(d1, d2, d3 float64) float64 {
+	return calcDistance3d(p, other, func(d1, d2, d3 float64) float64 {
 		return math.Sqrt(math.Pow(d1, 2) + math.Pow(d2, 2) + math.Pow(d3, 2))
 	})
 }
 
 func (p point3d) ManhattenDistanceTo(other point3d) uint {
-	return calcDistance(p, other, func(d1, d2, d3 float64) uint {
+	return calcDistance3d(p, other, func(d1, d2, d3 float64) uint {
 		return uint(d1 + d2 + d3)
 	})
 }
 
-func calcDistance[T any](p1, p2 point3d, result func(d1, d2, d3 float64) T) T {
+func calcDistance3d[T any](p1, p2 point3d, result func(d1, d2, d3 float64) T) T {
 	xDistance := math.Abs(float64(p1.x - p2.x))
 	yDistance := math.Abs(float64(p1.y - p2.y))
 	zDistance := math.Abs(float64(p1.z - p2.z))

@@ -30,15 +30,21 @@ func (p point2d) Multiply(n int) point2d {
 }
 
 func (p point2d) AirDistanceTo(other point2d) float64 {
-	xDistance := math.Abs(float64(other.x - p.x))
-	yDistance := math.Abs(float64(other.y - p.y))
-	return math.Sqrt(math.Pow(xDistance, 2) + math.Pow(yDistance, 2))
+	return calcDistance2d(p, other, func(d1, d2 float64) float64 {
+		return math.Sqrt(math.Pow(d1, 2) + math.Pow(d2, 2))
+	})
 }
 
-func (p point2d) ManhattenDistanceTo(other point2d) int {
-	xDistance := int(math.Abs(float64(other.x - p.x)))
-	yDistance := int(math.Abs(float64(other.y - p.y)))
-	return xDistance + yDistance
+func (p point2d) ManhattenDistanceTo(other point2d) uint {
+	return calcDistance2d(p, other, func(d1, d2 float64) uint {
+		return uint(d1 + d2)
+	})
+}
+
+func calcDistance2d[T any](p1, p2 point2d, result func(d1, d2 float64) T) T {
+	xDistance := math.Abs(float64(p1.x - p2.x))
+	yDistance := math.Abs(float64(p1.y - p2.y))
+	return result(xDistance, yDistance)
 }
 
 func (p point2d) String() string {
