@@ -86,3 +86,67 @@ func TestAirDistanceToPoint3d_8(t *testing.T) {
 		t.Fatalf("%v != %v", distance, math.Sqrt(29))
 	}
 }
+
+func TestManhattenDistanceToPoint3d_1(t *testing.T) {
+	p := geometry.CreatePoint3d(2, 4, 3)
+	distance := p.ManhattenDistanceTo(geometry.CreatePoint3d(4, 8, 6))
+	if distance != 9 {
+		t.Fatalf("%v != %v", distance, 9)
+	}
+}
+
+func TestManhattenDistanceToPoint3d_2(t *testing.T) {
+	p := geometry.CreatePoint3d(2, 4, 3)
+	distance := p.ManhattenDistanceTo(geometry.CreatePoint3d(0, 8, 6))
+	if distance != 9 {
+		t.Fatalf("%v != %v", distance, 9)
+	}
+}
+
+func TestManhattenDistanceToPoint3d_3(t *testing.T) {
+	p := geometry.CreatePoint3d(2, 4, 3)
+	distance := p.ManhattenDistanceTo(geometry.CreatePoint3d(4, 0, 6))
+	if distance != 9 {
+		t.Fatalf("%v != %v", distance, 9)
+	}
+}
+
+func TestManhattenDistanceToPoint3d_4(t *testing.T) {
+	p := geometry.CreatePoint3d(2, 4, 3)
+	distance := p.ManhattenDistanceTo(geometry.CreatePoint3d(4, 8, 0))
+	if distance != 9 {
+		t.Fatalf("%v != %v", distance, 9)
+	}
+}
+
+func TestManhattenDistanceToPoint3d_5(t *testing.T) {
+	p := geometry.CreatePoint3d(2, 4, 3)
+	distance := p.ManhattenDistanceTo(geometry.CreatePoint3d(0, 0, 6))
+	if distance != 9 {
+		t.Fatalf("%v != %v", distance, 9)
+	}
+}
+
+func TestManhattenDistanceToPoint3d_6(t *testing.T) {
+	p := geometry.CreatePoint3d(2, 4, 3)
+	distance := p.ManhattenDistanceTo(geometry.CreatePoint3d(0, 8, 0))
+	if distance != 9 {
+		t.Fatalf("%v != %v", distance, 9)
+	}
+}
+
+func TestManhattenDistanceToPoint3d_7(t *testing.T) {
+	p := geometry.CreatePoint3d(2, 4, 3)
+	distance := p.ManhattenDistanceTo(geometry.CreatePoint3d(4, 0, 0))
+	if distance != 9 {
+		t.Fatalf("%v != %v", distance, 9)
+	}
+}
+
+func TestManhattenDistanceToPoint3d_8(t *testing.T) {
+	p := geometry.CreatePoint3d(2, 4, 3)
+	distance := p.ManhattenDistanceTo(geometry.CreatePoint3d(0, 0, 0))
+	if distance != 9 {
+		t.Fatalf("%v != %v", distance, 9)
+	}
+}

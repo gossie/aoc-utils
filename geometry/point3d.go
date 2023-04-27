@@ -36,3 +36,10 @@ func (p point3d) AirDistanceTo(other point3d) float64 {
 	zDistance := math.Abs(float64(other.z - p.z))
 	return math.Sqrt(math.Pow(xDistance, 2) + math.Pow(yDistance, 2) + math.Pow(zDistance, 2))
 }
+
+func (p point3d) ManhattenDistanceTo(other point3d) uint {
+	xDistance := math.Abs(float64(other.x - p.x))
+	yDistance := math.Abs(float64(other.y - p.y))
+	zDistance := math.Abs(float64(other.z - p.z))
+	return uint(xDistance + yDistance + zDistance)
+}
