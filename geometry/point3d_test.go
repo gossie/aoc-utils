@@ -23,65 +23,65 @@ func TestMultiplyPoint3d(t *testing.T) {
 	}
 }
 
-func TestDistanceToPoint3d_1(t *testing.T) {
+func TestAirDistanceToPoint3d_1(t *testing.T) {
 	p := geometry.CreatePoint3d(2, 4, 3)
-	distance := p.DistanceTo(geometry.CreatePoint3d(4, 8, 6))
+	distance := p.AirDistanceTo(geometry.CreatePoint3d(4, 8, 6))
 	if distance != math.Sqrt(29) {
 		t.Fatalf("%v != %v", distance, math.Sqrt(29))
 	}
 }
 
-func TestDistanceToPoint3d_2(t *testing.T) {
+func TestAirDistanceToPoint3d_2(t *testing.T) {
 	p := geometry.CreatePoint3d(2, 4, 3)
-	distance := p.DistanceTo(geometry.CreatePoint3d(0, 8, 6))
+	distance := p.AirDistanceTo(geometry.CreatePoint3d(0, 8, 6))
 	if distance != math.Sqrt(29) {
 		t.Fatalf("%v != %v", distance, math.Sqrt(29))
 	}
 }
 
-func TestDistanceToPoint3d_3(t *testing.T) {
+func TestAirDistanceToPoint3d_3(t *testing.T) {
 	p := geometry.CreatePoint3d(2, 4, 3)
-	distance := p.DistanceTo(geometry.CreatePoint3d(4, 0, 6))
+	distance := p.AirDistanceTo(geometry.CreatePoint3d(4, 0, 6))
 	if distance != math.Sqrt(29) {
 		t.Fatalf("%v != %v", distance, math.Sqrt(29))
 	}
 }
 
-func TestDistanceToPoint3d_4(t *testing.T) {
+func TestAirDistanceToPoint3d_4(t *testing.T) {
 	p := geometry.CreatePoint3d(2, 4, 3)
-	distance := p.DistanceTo(geometry.CreatePoint3d(4, 8, 0))
+	distance := p.AirDistanceTo(geometry.CreatePoint3d(4, 8, 0))
 	if distance != math.Sqrt(29) {
 		t.Fatalf("%v != %v", distance, math.Sqrt(29))
 	}
 }
 
-func TestDistanceToPoint3d_5(t *testing.T) {
+func TestAirDistanceToPoint3d_5(t *testing.T) {
 	p := geometry.CreatePoint3d(2, 4, 3)
-	distance := p.DistanceTo(geometry.CreatePoint3d(0, 0, 6))
+	distance := p.AirDistanceTo(geometry.CreatePoint3d(0, 0, 6))
 	if distance != math.Sqrt(29) {
 		t.Fatalf("%v != %v", distance, math.Sqrt(29))
 	}
 }
 
-func TestDistanceToPoint3d_6(t *testing.T) {
+func TestAirDistanceToPoint3d_6(t *testing.T) {
 	p := geometry.CreatePoint3d(2, 4, 3)
-	distance := p.DistanceTo(geometry.CreatePoint3d(0, 8, 0))
+	distance := p.AirDistanceTo(geometry.CreatePoint3d(0, 8, 0))
 	if distance != math.Sqrt(29) {
 		t.Fatalf("%v != %v", distance, math.Sqrt(29))
 	}
 }
 
-func TestDistanceToPoint3d_7(t *testing.T) {
+func TestAirDistanceToPoint3d_7(t *testing.T) {
 	p := geometry.CreatePoint3d(2, 4, 3)
-	distance := p.DistanceTo(geometry.CreatePoint3d(4, 0, 0))
+	distance := p.AirDistanceTo(geometry.CreatePoint3d(4, 0, 0))
 	if distance != math.Sqrt(29) {
 		t.Fatalf("%v != %v", distance, math.Sqrt(29))
 	}
 }
 
-func TestDistanceToPoint3d_8(t *testing.T) {
+func TestAirDistanceToPoint3d_8(t *testing.T) {
 	p := geometry.CreatePoint3d(2, 4, 3)
-	distance := p.DistanceTo(geometry.CreatePoint3d(0, 0, 0))
+	distance := p.AirDistanceTo(geometry.CreatePoint3d(0, 0, 0))
 	if distance != math.Sqrt(29) {
 		t.Fatalf("%v != %v", distance, math.Sqrt(29))
 	}

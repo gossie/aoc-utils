@@ -23,34 +23,66 @@ func TestMultiplyPoint2d(t *testing.T) {
 	}
 }
 
-func TestDistanceToPoint2d_1(t *testing.T) {
+func TestAirDistanceToPoint2d_1(t *testing.T) {
 	p := geometry.CreatePoint2d(2, 4)
-	distance := p.DistanceTo(geometry.CreatePoint2d(4, 8))
+	distance := p.AirDistanceTo(geometry.CreatePoint2d(4, 8))
 	if distance != math.Sqrt(20) {
 		t.Fatalf("%v != %v", distance, math.Sqrt(20))
 	}
 }
 
-func TestDistanceToPoint2d_2(t *testing.T) {
+func TestAirDistanceToPoint2d_2(t *testing.T) {
 	p := geometry.CreatePoint2d(2, 4)
-	distance := p.DistanceTo(geometry.CreatePoint2d(0, 8))
+	distance := p.AirDistanceTo(geometry.CreatePoint2d(0, 8))
 	if distance != math.Sqrt(20) {
 		t.Fatalf("%v != %v", distance, math.Sqrt(20))
 	}
 }
 
-func TestDistanceToPoint2d_3(t *testing.T) {
+func TestAirDistanceToPoint2d_3(t *testing.T) {
 	p := geometry.CreatePoint2d(2, 4)
-	distance := p.DistanceTo(geometry.CreatePoint2d(0, 0))
+	distance := p.AirDistanceTo(geometry.CreatePoint2d(0, 0))
 	if distance != math.Sqrt(20) {
 		t.Fatalf("%v != %v", distance, math.Sqrt(20))
 	}
 }
 
-func TestDistanceToPoint2d_4(t *testing.T) {
+func TestAirDistanceToPoint2d_4(t *testing.T) {
 	p := geometry.CreatePoint2d(2, 4)
-	distance := p.DistanceTo(geometry.CreatePoint2d(4, 0))
+	distance := p.AirDistanceTo(geometry.CreatePoint2d(4, 0))
 	if distance != math.Sqrt(20) {
 		t.Fatalf("%v != %v", distance, math.Sqrt(20))
+	}
+}
+
+func TestManhattenDistanceToPoint2d_1(t *testing.T) {
+	p := geometry.CreatePoint2d(2, 4)
+	distance := p.ManhattenDistanceTo(geometry.CreatePoint2d(4, 8))
+	if distance != 6 {
+		t.Fatalf("%v != %v", distance, 6)
+	}
+}
+
+func TestManhattenDistanceToPoint2d_2(t *testing.T) {
+	p := geometry.CreatePoint2d(2, 4)
+	distance := p.ManhattenDistanceTo(geometry.CreatePoint2d(0, 8))
+	if distance != 6 {
+		t.Fatalf("%v != %v", distance, 6)
+	}
+}
+
+func TestManhattenDistanceToPoint2d_3(t *testing.T) {
+	p := geometry.CreatePoint2d(2, 4)
+	distance := p.ManhattenDistanceTo(geometry.CreatePoint2d(0, 0))
+	if distance != 6 {
+		t.Fatalf("%v != %v", distance, 6)
+	}
+}
+
+func TestManhattenDistanceToPoint2d_4(t *testing.T) {
+	p := geometry.CreatePoint2d(2, 4)
+	distance := p.ManhattenDistanceTo(geometry.CreatePoint2d(4, 0))
+	if distance != 6 {
+		t.Fatalf("%v != %v", distance, 6)
 	}
 }

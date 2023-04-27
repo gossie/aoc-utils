@@ -30,7 +30,7 @@ func (p point3d) Multiply(n int) point3d {
 	return CreatePoint3d(p.x*n, p.y*n, p.z*n)
 }
 
-func (p point3d) DistanceTo(other point3d) float64 {
+func (p point3d) AirDistanceTo(other point3d) float64 {
 	xDistance := math.Abs(float64(other.x - p.x))
 	yDistance := math.Abs(float64(other.y - p.y))
 	zDistance := math.Abs(float64(other.z - p.z))
