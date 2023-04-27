@@ -1,25 +1,40 @@
 package geometry
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
-type Point2d struct {
-	X, Y int
+type point2d struct {
+	x, y int
 }
 
-func CreatePoint2d(x, y int) Point2d {
-	return Point2d{x, y}
+func CreatePoint2d(x, y int) point2d {
+	return point2d{x, y}
 }
 
-func (p Point2d) Add(other Point2d) Point2d {
-	return CreatePoint2d(p.X+other.X, p.Y+other.Y)
+func (p point2d) X() int {
+	return p.x
 }
 
-func (p Point2d) Multiply(n int) Point2d {
-	return CreatePoint2d(p.X*n, p.Y*n)
+func (p point2d) Y() int {
+	return p.y
 }
 
-func (p Point2d) DistanceTo(other Point2d) float64 {
-	xDistance := math.Abs(float64(other.X - p.X))
-	yDistance := math.Abs(float64(other.Y - p.Y))
+func (p point2d) Add(other point2d) point2d {
+	return CreatePoint2d(p.x+other.x, p.y+other.y)
+}
+
+func (p point2d) Multiply(n int) point2d {
+	return CreatePoint2d(p.x*n, p.y*n)
+}
+
+func (p point2d) DistanceTo(other point2d) float64 {
+	xDistance := math.Abs(float64(other.x - p.x))
+	yDistance := math.Abs(float64(other.y - p.y))
 	return math.Sqrt(math.Pow(xDistance, 2) + math.Pow(yDistance, 2))
+}
+
+func (p point2d) String() string {
+	return fmt.Sprintf("x: %d, y: %d", p.x, p.y)
 }

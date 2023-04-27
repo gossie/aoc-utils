@@ -10,16 +10,16 @@ import (
 func TestAddPoint2d(t *testing.T) {
 	p := geometry.CreatePoint2d(7, 17)
 	sum := p.Add(geometry.CreatePoint2d(2, -7))
-	if sum.X != 9 || sum.Y != 10 {
-		t.Fatalf("%v != 9 or %v != 10", sum.X, sum.Y)
+	if sum.X() != 9 || sum.Y() != 10 {
+		t.Fatalf("%v != 9 or %v != 10", sum.X(), sum.Y())
 	}
 }
 
 func TestMultiplyPoint2d(t *testing.T) {
 	p := geometry.CreatePoint2d(7, 17)
 	product := p.Multiply(4)
-	if product.X != 28 || product.Y != 68 {
-		t.Fatalf("%v != 28 or %v != 10", product.X, product.Y)
+	if product.X() != 28 || product.Y() != 68 {
+		t.Fatalf("%v != 28 or %v != 10", product.X(), product.Y())
 	}
 }
 
