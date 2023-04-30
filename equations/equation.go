@@ -167,6 +167,7 @@ func (v value) execute() value {
 		v.right = &r
 	}
 
+	var val1, val2, val3 value
 	var number1, number2 float64
 	var varName1, varName2 string
 
@@ -179,28 +180,26 @@ func (v value) execute() value {
 		v.setNumber(v.left.number - v.right.number)
 	case bin(anyNum(&number1), "/", anyNum(&number2))(&v):
 		v.setNumber(v.left.number / v.right.number)
-	case bin(any(), "*", num(0))(&v) || bin(num(0), "*", any())(&v):
+	case bin(any(&val1), "*", num(0))(&v) || bin(num(0), "*", any(&val2))(&v):
 		v.setNumber(0)
-	case bin(any(), "*", num(1))(&v) || bin(any(), "/", num(1))(&v):
-		v = *v.left
-	case bin(num(1), "*", any())(&v):
-		v = *v.right
-	case bin(any(), "+", num(0))(&v) || bin(any(), "-", num(0))(&v):
-		v = *v.left
-	case bin(num(0), "+", any())(&v):
-		v = *v.right
+	case bin(any(&val1), "*", num(1))(&v) || bin(num(1), "*", any(&val1))(&v) || bin(any(&val1), "/", num(1))(&v) || bin(any(&val1), "+", num(0))(&v) || bin(num(0), "+", any(&val1))(&v) || bin(any(&val1), "-", num(0))(&v):
+		v = val1
 	case bin(bin(anyNum(&number1), "*", anyVariable(&varName1)), "+", bin(anyNum(&number2), "*", anyVariable(&varName2)))(&v) && varName1 == varName2:
 		v.setVariable(number1+number2, varName1)
 	case bin(bin(anyNum(&number1), "*", anyVariable(&varName1)), "-", bin(anyNum(&number2), "*", anyVariable(&varName2)))(&v) && varName1 == varName2:
 		v.setVariable(number1-number2, varName1)
-	case bin(bin(anyNum(&number1), "*", anyVariable(&varName1)), "*", anyNum(&number2))(&v):
-		v.setVariable(number1*number2, varName1)
-	case bin(anyNum(&number1), "*", bin(anyNum(&number2), "*", anyVariable(&varName1)))(&v):
+	case bin(bin(anyNum(&number1), "*", anyVariable(&varName1)), "*", anyNum(&number2))(&v) || bin(anyNum(&number1), "*", bin(anyNum(&number2), "*", anyVariable(&varName1)))(&v):
 		v.setVariable(number1*number2, varName1)
 	case bin(bin(anyNum(&number1), "*", anyVariable(&varName1)), "/", anyNum(&number2))(&v):
 		v.setVariable(number1/number2, varName1)
-	case bin(anyNum(&number1), "*", bin(any(), "/", anyNum(&number2)))(&v) && number1 == number2:
-		v = *v.right.left
+	case bin(bin(any(&val1), "+", any(&val2)), "*", any(&val3))(&v) || bin(any(&val3), "*", bin(any(&val1), "+", any(&val2)))(&v):
+		v = Add(Mul(val1, val3).execute(), Mul(val2, val3).execute())
+	case bin(bin(any(&val1), "+", any(&val2)), "/", any(&val3))(&v):
+		v = Add(Div(val1, val3).execute(), Div(val2, val3).execute())
+	case bin(bin(any(&val1), "-", any(&val2)), "*", any(&val3))(&v) || bin(any(&val3), "*", bin(any(&val1), "-", any(&val2)))(&v):
+		v = Sub(Mul(val1, val3), Mul(val2, val3)).execute()
+	case bin(bin(any(&val1), "/", anyNum(&number1)), "*", anyNum(&number2))(&v):
+		v = Div(val1, Num(number2/number1)).execute()
 	}
 	return v
 }

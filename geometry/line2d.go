@@ -20,11 +20,16 @@ func (l Line2d) Contains(point Point2d) bool {
 func (l Line2d) IntersectsAt(other Line2d) (Point2d, error) {
 	// xLeft := equations.Add(equations.Num(l.start.x), equations.Mul(equations.Var("l"), equations.Num(l.direction.x)))
 	// xRight := equations.Add(equations.Num(other.start.x), equations.Mul(equations.Var("r"), equations.Num(other.direction.x)))
-	// eq1, _ := equations.NewEquation(xLeft, xRight).SolveTo("l")
+	// firstEq := equations.NewEquation(xLeft, xRight)
 
 	// yLeft := equations.Add(equations.Num(l.start.y), equations.Mul(equations.Var("l"), equations.Num(l.direction.y)))
 	// yRight := equations.Add(equations.Num(other.start.y), equations.Mul(equations.Var("r"), equations.Num(other.direction.y)))
-	// eq2, _ := equations.NewEquation(yLeft, yRight).SolveTo(r)
+	// secondEq := equations.NewEquation(yLeft, yRight)
+
+	// lValue, _ := firstEq.SolveTo("l")
+	// rValue, _ := secondEq.Set("l", *lValue).SolveTo("r")
+
+	// // TODO: check
 
 	return Point2d{}, nil
 }

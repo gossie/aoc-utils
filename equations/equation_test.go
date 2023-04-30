@@ -22,8 +22,8 @@ func TestSolveToR(t *testing.T) {
 
 	r, _ := equations.NewEquation(left, right).SolveTo("r")
 
-	if r.String() != "((s + 5.000000) / 4.000000)" {
-		t.Fatalf("expected %v to be ((s + 5.000000) / 4.000000)", r)
+	if r.String() != "((s / 4.000000) + 1.250000)" {
+		t.Fatalf("expected %v to be ((s / 4.000000) + 1.250000)", r)
 	}
 }
 
@@ -107,5 +107,45 @@ func TestOptimize_5(t *testing.T) {
 	eq := equations.NewEquation(left, right).Optimize()
 	if eq.String() != "(2.000000 * r) = 12.000000" {
 		t.Fatalf("expected %v to be (2.000000 * r) = 12.000000", eq)
+	}
+}
+
+func TestOptimize_6(t *testing.T) {
+	left := equations.Mul(equations.Mul(equations.Num(4), equations.Var("r")), equations.Num(1))
+	right := equations.Num(12.000000)
+
+	eq := equations.NewEquation(left, right).Optimize()
+	if eq.String() != "(4.000000 * r) = 12.000000" {
+		t.Fatalf("expected %v to be (4.000000 * r) = 12.000000", eq)
+	}
+}
+
+func TestOptimize_7(t *testing.T) {
+	left := equations.Mul(equations.Num(1), equations.Mul(equations.Num(4), equations.Var("r")))
+	right := equations.Num(12.000000)
+
+	eq := equations.NewEquation(left, right).Optimize()
+	if eq.String() != "(4.000000 * r) = 12.000000" {
+		t.Fatalf("expected %v to be (4.000000 * r) = 12.000000", eq)
+	}
+}
+
+func TestOptimize_8(t *testing.T) {
+	left := equations.Mul(equations.Num(2), equations.Sub(equations.Mul(equations.Num(1), equations.Var("r")), equations.Num(4)))
+	right := equations.Num(12.000000)
+
+	eq := equations.NewEquation(left, right).Optimize()
+	if eq.String() != "((r * 2.000000) - 8.000000) = 12.000000" {
+		t.Fatalf("expected %v to be ((r * 2.000000) - 8.000000) = 12.000000", eq)
+	}
+}
+
+func TestOptimize_9(t *testing.T) {
+	left := equations.Mul(equations.Sub(equations.Mul(equations.Num(1), equations.Var("r")), equations.Num(4)), equations.Num(2))
+	right := equations.Num(12.000000)
+
+	eq := equations.NewEquation(left, right).Optimize()
+	if eq.String() != "((r * 2.000000) - 8.000000) = 12.000000" {
+		t.Fatalf("expected %v to be ((r * 2.000000) - 8.000000) = 12.000000", eq)
 	}
 }

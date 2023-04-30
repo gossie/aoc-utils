@@ -34,8 +34,9 @@ func anyVariable(name *string) matcher {
 	}
 }
 
-func any() matcher {
+func any(val *value) matcher {
 	return func(v *value) bool {
+		*val = *v
 		return v != nil
 	}
 }
