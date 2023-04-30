@@ -6,27 +6,31 @@ import (
 )
 
 type Point2d struct {
-	x, y int
+	x, y float64
 }
 
-func CreatePoint2d(x, y int) Point2d {
+func NewPoint2d(x, y float64) Point2d {
 	return Point2d{x, y}
 }
 
-func (p Point2d) X() int {
+func (p Point2d) X() float64 {
 	return p.x
 }
 
-func (p Point2d) Y() int {
+func (p Point2d) Y() float64 {
 	return p.y
 }
 
 func (p Point2d) Add(other Point2d) Point2d {
-	return CreatePoint2d(p.x+other.x, p.y+other.y)
+	return NewPoint2d(p.x+other.x, p.y+other.y)
 }
 
-func (p Point2d) Multiply(n int) Point2d {
-	return CreatePoint2d(p.x*n, p.y*n)
+func (p Point2d) Subtract(other Point2d) Point2d {
+	return NewPoint2d(p.x-other.x, p.y-other.y)
+}
+
+func (p Point2d) Multiply(n float64) Point2d {
+	return NewPoint2d(p.x*n, p.y*n)
 }
 
 func (p Point2d) AirDistanceTo(other Point2d) float64 {
@@ -35,18 +39,18 @@ func (p Point2d) AirDistanceTo(other Point2d) float64 {
 	})
 }
 
-func (p Point2d) ManhattenDistanceTo(other Point2d) uint {
-	return calcDistance2d(p, other, func(d1, d2 float64) uint {
-		return uint(d1 + d2)
+func (p Point2d) ManhattenDistanceTo(other Point2d) float64 {
+	return calcDistance2d(p, other, func(d1, d2 float64) float64 {
+		return d1 + d2
 	})
 }
 
 func calcDistance2d[T any](p1, p2 Point2d, result func(d1, d2 float64) T) T {
-	xDistance := math.Abs(float64(p1.x - p2.x))
-	yDistance := math.Abs(float64(p1.y - p2.y))
+	xDistance := math.Abs(p1.x - p2.x)
+	yDistance := math.Abs(p1.y - p2.y)
 	return result(xDistance, yDistance)
 }
 
 func (p Point2d) String() string {
-	return fmt.Sprintf("x: %d, y: %d", p.x, p.y)
+	return fmt.Sprintf("x: %f, y: %f", p.x, p.y)
 }

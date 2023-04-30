@@ -9,7 +9,7 @@ type Point3d struct {
 	x, y, z int
 }
 
-func CreatePoint3d(x, y, z int) Point3d {
+func NewPoint3d(x, y, z int) Point3d {
 	return Point3d{x, y, z}
 }
 
@@ -26,11 +26,11 @@ func (p Point3d) Z() int {
 }
 
 func (p Point3d) Add(other Point3d) Point3d {
-	return CreatePoint3d(p.x+other.x, p.y+other.y, p.z+other.z)
+	return NewPoint3d(p.x+other.x, p.y+other.y, p.z+other.z)
 }
 
 func (p Point3d) Multiply(n int) Point3d {
-	return CreatePoint3d(p.x*n, p.y*n, p.z*n)
+	return NewPoint3d(p.x*n, p.y*n, p.z*n)
 }
 
 func (p Point3d) AirDistanceTo(other Point3d) float64 {
