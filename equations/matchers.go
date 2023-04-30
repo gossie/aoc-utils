@@ -8,15 +8,29 @@ func num(n float64) matcher {
 	}
 }
 
-func anyNum() matcher {
+func anyNum(n *float64) matcher {
 	return func(v *value) bool {
-		return v.op == "num"
+		if v.op == "num" {
+			*n = v.number
+			return true
+		}
+		return false
 	}
 }
 
 func variable(name string) matcher {
 	return func(val *value) bool {
 		return val.op == "var" && val.name == name
+	}
+}
+
+func anyVariable(name *string) matcher {
+	return func(v *value) bool {
+		if v.op == "var" {
+			*name = v.name
+			return true
+		}
+		return false
 	}
 }
 
