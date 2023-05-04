@@ -24,9 +24,10 @@ func variable(name string) matcher {
 	}
 }
 
-func anyVariable(name *string) matcher {
+func anyVariable(factor *float64, name *string) matcher {
 	return func(v *value) bool {
 		if v.op == "var" {
+			*factor = v.number
 			*name = v.name
 			return true
 		}

@@ -3,6 +3,7 @@ package equations
 import (
 	"errors"
 	"fmt"
+	"reflect"
 )
 
 type BinaryOp func(value, value) value
@@ -36,32 +37,34 @@ type opValuePair struct {
 
 type path []*opValuePair
 
-func findValue(val *value, name string) (*value, path, error) {
+func findValue(val *value, name string) (*value, path, path, error) {
 	if variable(name)(val) {
-		return val, make(path, 0), nil
+		return val, make(path, 0), append(make(path, 0), &opValuePair{"/", Num(val.number), false}), nil
 	}
 
 	if val.left != nil || val.right != nil {
 		if val.left != nil {
-			found, p, err := findValue(val.left, name)
+			found, pathToValue, complementaryPath, err := findValue(val.left, name)
 			if err == nil {
 				op := rightComplements[val.op]
-				p = append(p, &opValuePair{op, *val.right, false})
-				return found, p, nil
+				pathToValue = append(pathToValue, &opValuePair{op, *val.left, val.op == "-" || val.op == "/"})
+				complementaryPath = append(complementaryPath, &opValuePair{op, *val.right, false})
+				return found, pathToValue, complementaryPath, nil
 			}
 		}
 
 		if val.right != nil {
-			found, p, err := findValue(val.right, name)
+			found, pathToValue, complementaryPath, err := findValue(val.right, name)
 			if err == nil {
 				op := leftComplements[val.op]
-				p = append(p, &opValuePair{op, *val.left, val.op == "-" || val.op == "/"})
-				return found, p, nil
+				pathToValue = append(pathToValue, &opValuePair{op, *val.right, false})
+				complementaryPath = append(complementaryPath, &opValuePair{op, *val.left, val.op == "-" || val.op == "/"})
+				return found, pathToValue, complementaryPath, nil
 			}
 		}
 	}
 
-	return nil, nil, errors.New("variable " + name + " not found")
+	return nil, nil, nil, errors.New("variable " + name + " not found")
 }
 
 type equation struct {
@@ -79,31 +82,48 @@ func (e equation) Optimize() equation {
 }
 
 func (e equation) SolveTo(varName string) (*value, error) {
-	foundLeft, pLeft, errLeft := findValue(&e.left, varName)
-	foundRight, pRight, errRight := findValue(&e.right, varName)
+	left, _, leftComplementaryPath, errLeft := findValue(&e.left, varName)
+	right, rightPath, rightComplementaryPath, errRight := findValue(&e.right, varName)
 
-	if foundLeft != nil && foundRight != nil {
-		return nil, errors.New(varName + " found on both sides, currently that cannot be handle")
+	fmt.Println(e)
+
+	if left != nil && right != nil {
+		eq := NewEquation(processPathElement(rightPath[len(rightPath)-1], e.left), processPathElement(rightPath[len(rightPath)-1], e.right))
+		fmt.Println(eq)
+		eq = eq.Optimize()
+		fmt.Println(eq)
+		eq = eq.Optimize()
+		fmt.Println(eq)
+		return eq.SolveTo(varName)
 	}
 
 	if errLeft != nil && errRight != nil {
 		return nil, errors.New(varName + " could not be found")
 	}
 
-	if foundLeft != nil {
-		return processPath(e.right, pLeft)
+	if left != nil {
+		return processPath(e.right, leftComplementaryPath)
 	} else {
-		return processPath(e.left, pRight)
+		return processPath(e.left, rightComplementaryPath)
 	}
 }
 
 func (e equation) Set(varName string, val value) equation {
-	return NewEquation(insert(e.left, varName, val), insert(e.right, varName, val))
+
+	// fmt.Println(val)
+	// fmt.Println(e)
+	newLeft := insert(e.left, varName, val)
+	// fmt.Println("newLeft:", newLeft)
+
+	newRight := insert(e.right, varName, val)
+	// fmt.Println("newRight:", newRight)
+
+	return NewEquation(newLeft, newRight)
 }
 
 func insert(current value, varName string, val value) value {
 	if variable(varName)(&current) {
-		return val
+		return Mul(Num(current.number), val)
 	}
 
 	if op, present := operators[current.op]; present {
@@ -116,36 +136,41 @@ func insert(current value, varName string, val value) value {
 func processPath(val value, p path) (*value, error) {
 	current := val
 	for i := len(p) - 1; i >= 0; i-- {
-		v := p[i]
-		switch v.op {
-		case "+":
-			if v.swap {
-				current = Add(v.val, current)
-			} else {
-				current = Add(current, v.val)
-			}
-		case "*":
-			if v.swap {
-				current = Mul(v.val, current)
-			} else {
-				current = Mul(current, v.val)
-			}
-		case "-":
-			if v.swap {
-				current = Sub(v.val, current)
-			} else {
-				current = Sub(current, v.val)
-			}
-		case "/":
-			if v.swap {
-				current = Div(v.val, current)
-			} else {
-				current = Div(current, v.val)
-			}
-		}
+		current = processPathElement(p[i], current)
 	}
 	result := current.execute()
 	return &result, nil
+}
+
+func processPathElement(v *opValuePair, current value) value {
+	switch v.op {
+	default:
+		panic("unkown operator " + v.op)
+	case "+":
+		if v.swap {
+			return Add(v.val, current)
+		} else {
+			return Add(current, v.val)
+		}
+	case "*":
+		if v.swap {
+			return Mul(v.val, current)
+		} else {
+			return Mul(current, v.val)
+		}
+	case "-":
+		if v.swap {
+			return Sub(v.val, current)
+		} else {
+			return Sub(current, v.val)
+		}
+	case "/":
+		if v.swap {
+			return Div(v.val, current)
+		} else {
+			return Div(current, v.val)
+		}
+	}
 }
 
 func (e equation) String() string {
@@ -168,56 +193,56 @@ func (v value) execute() value {
 	}
 
 	var val1, val2, val3 value
-	var number1, number2 float64
+	var number1, number2, number3 float64
 	var varName1, varName2 string
 
 	switch {
+	// Grundrechenarten
 	case bin(anyNum(&number1), "+", anyNum(&number2))(&v):
-		v.setNumber(v.left.number + v.right.number)
+		v = Num(v.left.number + v.right.number)
 	case bin(anyNum(&number1), "*", anyNum(&number2))(&v):
-		v.setNumber(v.left.number * v.right.number)
+		v = Num(v.left.number * v.right.number)
 	case bin(anyNum(&number1), "-", anyNum(&number2))(&v):
-		v.setNumber(v.left.number - v.right.number)
+		v = Num(v.left.number - v.right.number)
 	case bin(anyNum(&number1), "/", anyNum(&number2))(&v):
-		v.setNumber(v.left.number / v.right.number)
+		v = Num(v.left.number / v.right.number)
+	// Multiplikation mit 0 (kommutativ)
 	case bin(any(&val1), "*", num(0))(&v) || bin(num(0), "*", any(&val2))(&v):
-		v.setNumber(0)
+		v = Num(0)
+	// Multiplikation mit 1 (kommutativ), Division durch 1, Addition mit 0 (kommutativ) oder Subtraktion von 0
 	case bin(any(&val1), "*", num(1))(&v) || bin(num(1), "*", any(&val1))(&v) || bin(any(&val1), "/", num(1))(&v) || bin(any(&val1), "+", num(0))(&v) || bin(num(0), "+", any(&val1))(&v) || bin(any(&val1), "-", num(0))(&v):
 		v = val1
-	case bin(bin(anyNum(&number1), "*", anyVariable(&varName1)), "+", bin(anyNum(&number2), "*", anyVariable(&varName2)))(&v) && varName1 == varName2:
-		v.setVariable(number1+number2, varName1)
-	case bin(bin(anyNum(&number1), "*", anyVariable(&varName1)), "-", bin(anyNum(&number2), "*", anyVariable(&varName2)))(&v) && varName1 == varName2:
-		v.setVariable(number1-number2, varName1)
-	case bin(bin(anyNum(&number1), "*", anyVariable(&varName1)), "*", anyNum(&number2))(&v) || bin(anyNum(&number1), "*", bin(anyNum(&number2), "*", anyVariable(&varName1)))(&v):
-		v.setVariable(number1*number2, varName1)
-	case bin(bin(anyNum(&number1), "*", anyVariable(&varName1)), "/", anyNum(&number2))(&v):
-		v.setVariable(number1/number2, varName1)
-	case bin(bin(any(&val1), "+", any(&val2)), "*", any(&val3))(&v) || bin(any(&val3), "*", bin(any(&val1), "+", any(&val2)))(&v):
-		v = Add(Mul(val1, val3).execute(), Mul(val2, val3).execute())
-	case bin(bin(any(&val1), "+", any(&val2)), "/", any(&val3))(&v):
-		v = Add(Div(val1, val3).execute(), Div(val2, val3).execute())
-	case bin(bin(any(&val1), "-", any(&val2)), "*", any(&val3))(&v) || bin(any(&val3), "*", bin(any(&val1), "-", any(&val2)))(&v):
-		v = Sub(Mul(val1, val3), Mul(val2, val3)).execute()
-	case bin(bin(any(&val1), "/", anyNum(&number1)), "*", anyNum(&number2))(&v):
-		v = Div(val1, Num(number2/number1)).execute()
+	case bin(bin(any(&val1), "+", any(&val2)), "-", any(&val3))(&v) && reflect.DeepEqual(val1, val3):
+		v = val2
+	case bin(bin(any(&val1), "+", any(&val2)), "-", any(&val3))(&v) && reflect.DeepEqual(val2, val3):
+		v = val1
+	// Rechnen mit Variable
+	case bin(anyVariable(&number1, &varName1), "/", anyNum(&number2))(&v):
+		v = Var(number1/number2, varName1)
+	case bin(anyVariable(&number1, &varName1), "*", anyNum(&number2))(&v) || bin(anyNum(&number1), "*", anyVariable(&number2, &varName1))(&v):
+		v = Var(number1*number2, varName1)
+	case bin(anyVariable(&number1, &varName1), "+", anyVariable(&number2, &varName2))(&v) && varName1 == varName2:
+		v = Var(number1+number2, varName1)
+	case bin(anyVariable(&number1, &varName1), "-", anyVariable(&number2, &varName2))(&v) && varName1 == varName2:
+		v = Var(number1-number2, varName1)
+	case bin(anyVariable(&number1, &varName1), "*", anyNum(&number2))(&v) || bin(anyNum(&number1), "*", anyVariable(&number2, &varName1))(&v):
+		v = Var(number1*number2, varName1)
+	case bin(anyVariable(&number1, &varName1), "/", anyNum(&number2))(&v):
+		v = Var(number1/number2, varName1)
+	// Distributivgesetze
+	case bin(bin(any(&val1), "+", any(&val2)), "*", anyNum(&number1))(&v) || bin(anyNum(&number1), "*", bin(any(&val1), "+", any(&val2)))(&v):
+		v = Add(Mul(Num(number1), val1), Mul(Num(number1), val2)).execute()
+	case bin(bin(any(&val1), "-", any(&val2)), "*", anyNum(&number1))(&v) || bin(anyNum(&number1), "*", bin(any(&val1), "-", any(&val2)))(&v):
+		v = Sub(Mul(Num(number1), val1), Mul(Num(number1), val2)).execute()
+	case bin(bin(any(&val1), "+", any(&val2)), "/", anyNum(&number1))(&v):
+		v = Add(Div(val1, Num(number1)), Div(val2, Num(number1))).execute()
+	case bin(bin(any(&val1), "-", any(&val2)), "/", anyNum(&number1))(&v):
+		v = Sub(Div(val1, Num(number1)), Div(val2, Num(number1))).execute()
+	// Assoziativgesetze? (varible wird bearbeitet)
+	case bin(bin(anyVariable(&number1, &varName1), "+", anyNum(&number2)), "-", anyVariable(&number3, &varName2))(&v):
+		v = Add(Var(number1-number3, varName1), Num(number2))
 	}
 	return v
-}
-
-func (v *value) setNumber(number float64) {
-	v.op = "num"
-	v.number = number
-	v.left = nil
-	v.right = nil
-}
-
-func (v *value) setVariable(number float64, varName string) {
-	factor := Num(number)
-	variable := Var(varName)
-
-	v.op = "*"
-	v.left = &factor
-	v.right = &variable
 }
 
 func (v value) String() string {
@@ -227,7 +252,7 @@ func (v value) String() string {
 	case "num":
 		return fmt.Sprintf("%f", v.number)
 	case "var":
-		return v.name
+		return fmt.Sprintf("%f%v", v.number, v.name)
 	case "+":
 		return fmt.Sprintf("(%v + %v)", v.left, v.right)
 	case "*":
@@ -259,6 +284,6 @@ func Div(left, right value) value {
 	return value{left: &left, right: &right, op: "/"}
 }
 
-func Var(name string) value {
-	return value{name: name, op: "var"}
+func Var(factor float64, name string) value {
+	return value{number: factor, name: name, op: "var"}
 }

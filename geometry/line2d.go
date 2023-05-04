@@ -14,7 +14,7 @@ func NewLine2d(p1, p2 Point2d) Line2d {
 
 func (l Line2d) Contains(point Point2d) bool {
 	left := point.Subtract(l.start)
-	return float64(left.x)/float64(l.direction.x) == float64(left.y)/float64(l.direction.y)
+	return left.x/l.direction.x == left.y/l.direction.y
 }
 
 func (l Line2d) IntersectsAt(other Line2d) (Point2d, error) {
