@@ -1,6 +1,7 @@
 package geometry
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/gossie/aoc-utils/equations"
@@ -32,23 +33,23 @@ func (l Line2d) IntersectsAt(other Line2d) (Point2d, error) {
 	yRight := equations.Add(equations.Num(other.start.y), equations.Var(other.direction.y, "r"))
 	secondEq := equations.NewEquation(yLeft, yRight)
 
-	// fmt.Println("firstEq ", firstEq)
-	// fmt.Println("secondEq", secondEq)
-
 	lValue, _ := firstEq.SolveTo("l")
-	// fmt.Println("lValue ", lValue)
 	secondWithL := secondEq.Set("l", *lValue)
-	// fmt.Println("secondWithL ", secondWithL)
-	rValue, _ := secondWithL.SolveTo("r")
-	// fmt.Println("rValue", rValue)
+	rValue, err := secondWithL.SolveTo("r")
+	if err != nil {
+		err, ok := err.(*equations.SolveError)
+		if ok {
+			if err.FinalEquation.IsTrue() {
+				return Point2d{}, errors.New("same line")
+			} else {
+				return Point2d{}, errors.New("no intersection")
+			}
+		}
+		return Point2d{}, err
 
-	//p1 := l.Point(lValue.Number())
-	p2 := other.Point(rValue.Number())
-	// if p1 != p2 {
-	// 	return Point2d{}, errors.New("no intersection")
-	// }
+	}
 
-	return p2, nil
+	return other.Point(rValue.Number()), nil
 }
 
 func (l Line2d) String() string {

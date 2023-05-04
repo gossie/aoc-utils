@@ -67,6 +67,15 @@ func findValue(val *value, name string) (*value, path, path, error) {
 	return nil, nil, nil, errors.New("variable " + name + " not found")
 }
 
+type SolveError struct {
+	err           error
+	FinalEquation equation
+}
+
+func (se *SolveError) Error() string {
+	return se.err.Error()
+}
+
 type equation struct {
 	left, right value
 }
@@ -75,18 +84,22 @@ func NewEquation(left, right value) equation {
 	return equation{left: left, right: right}
 }
 
+func (e equation) IsTrue() bool {
+	return e.left.execute() == e.right.execute()
+}
+
 func (e equation) Optimize() equation {
 	l := e.left.execute()
 	r := e.right.execute()
 	return NewEquation(l, r)
 }
 
-func (e equation) SolveTo(varName string) (*value, error) {
-	left, _, leftComplementaryPath, errLeft := findValue(&e.left, varName)
-	right, rightPath, rightComplementaryPath, errRight := findValue(&e.right, varName)
+func (eq equation) SolveTo(varName string) (*value, error) {
+	left, _, leftComplementaryPath, errLeft := findValue(&eq.left, varName)
+	right, rightPath, rightComplementaryPath, errRight := findValue(&eq.right, varName)
 
 	if left != nil && right != nil {
-		eq := NewEquation(processPathElement(rightPath[len(rightPath)-1], e.left), processPathElement(rightPath[len(rightPath)-1], e.right))
+		eq := NewEquation(processPathElement(rightPath[len(rightPath)-1], eq.left), processPathElement(rightPath[len(rightPath)-1], eq.right))
 		fmt.Println(eq)
 		eq = eq.Optimize()
 		fmt.Println(eq)
@@ -94,13 +107,13 @@ func (e equation) SolveTo(varName string) (*value, error) {
 	}
 
 	if errLeft != nil && errRight != nil {
-		return nil, errors.New(varName + " could not be found")
+		return nil, &SolveError{errors.New(varName + " could not be found"), eq}
 	}
 
 	if left != nil {
-		return processPath(e.right, leftComplementaryPath)
+		return processPath(eq.right, leftComplementaryPath), nil
 	} else {
-		return processPath(e.left, rightComplementaryPath)
+		return processPath(eq.left, rightComplementaryPath), nil
 	}
 }
 
@@ -122,13 +135,13 @@ func insert(current value, varName string, val value) value {
 	return current
 }
 
-func processPath(val value, p path) (*value, error) {
+func processPath(val value, p path) *value {
 	current := val
 	for i := len(p) - 1; i >= 0; i-- {
 		current = processPathElement(p[i], current)
 	}
 	result := current.execute()
-	return &result, nil
+	return &result
 }
 
 func processPathElement(v *opValuePair, current value) value {
@@ -239,11 +252,19 @@ func (v value) execute() value {
 		v = Add(Var(number1+number3, varName1), Num(number2)).execute()
 	case bin(bin(any(&val1), "+", anyNum(&number1)), "+", anyNum(&number2))(&v):
 		v = Add(val1, Num(number1+number2)).execute()
+	case bin(bin(anyNum(&number1), "+", any(&val1)), "+", anyNum(&number2))(&v):
+		v = Add(Num(number1+number2), val1).execute()
+	case bin(bin(any(&val1), "+", anyVariable(&number1, &varName1)), "+", anyVariable(&number2, &varName2))(&v) && varName1 == varName2:
+		v = Add(val1, Var(number1+number2, varName1)).execute()
 	case bin(anyNum(&number1), "+", bin(any(&val1), "+", anyNum(&number2)))(&v):
+		v = Add(val1, Num(number1+number2)).execute()
+	case bin(anyNum(&number1), "+", bin(anyNum(&number2), "+", any(&val1)))(&v):
 		v = Add(val1, Num(number1+number2)).execute()
 	}
 	return v
 }
+
+// ((1.500000 + 1.000000r) + -1.000000)
 
 func (v value) String() string {
 	switch v.op {

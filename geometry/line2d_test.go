@@ -35,7 +35,16 @@ func TestIntersects_noIntersection(t *testing.T) {
 	line1 := geometry.NewLine2d(geometry.NewPoint2d(1, 2), geometry.NewPoint2d(3, 3))
 	line2 := geometry.NewLine2d(geometry.NewPoint2d(0, 1), geometry.NewPoint2d(2, 2))
 	_, err := line1.IntersectsAt(line2)
-	if err == nil {
+	if err == nil || err.Error() != "no intersection" {
+		t.Fatalf("lines should not intersect")
+	}
+}
+
+func TestIntersects_sameLine(t *testing.T) {
+	line1 := geometry.NewLine2d(geometry.NewPoint2d(1, 2), geometry.NewPoint2d(3, 3))
+	line2 := geometry.NewLine2d(geometry.NewPoint2d(5, 4), geometry.NewPoint2d(7, 5))
+	_, err := line1.IntersectsAt(line2)
+	if err == nil || err.Error() != "same line" {
 		t.Fatalf("lines should not intersect")
 	}
 }
