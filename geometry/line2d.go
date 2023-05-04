@@ -2,6 +2,8 @@ package geometry
 
 import (
 	"fmt"
+
+	"github.com/gossie/aoc-utils/equations"
 )
 
 type Line2d struct {
@@ -17,21 +19,36 @@ func (l Line2d) Contains(point Point2d) bool {
 	return left.x/l.direction.x == left.y/l.direction.y
 }
 
+func (l Line2d) Point(factor float64) Point2d {
+	return NewPoint2d(l.start.x+factor*l.direction.x, l.start.y+factor*l.direction.y)
+}
+
 func (l Line2d) IntersectsAt(other Line2d) (Point2d, error) {
-	// xLeft := equations.Add(equations.Num(l.start.x), equations.Mul(equations.Var("l"), equations.Num(l.direction.x)))
-	// xRight := equations.Add(equations.Num(other.start.x), equations.Mul(equations.Var("r"), equations.Num(other.direction.x)))
-	// firstEq := equations.NewEquation(xLeft, xRight)
+	xLeft := equations.Add(equations.Num(l.start.x), equations.Var(l.direction.x, "l"))
+	xRight := equations.Add(equations.Num(other.start.x), equations.Var(other.direction.x, "r"))
+	firstEq := equations.NewEquation(xLeft, xRight)
 
-	// yLeft := equations.Add(equations.Num(l.start.y), equations.Mul(equations.Var("l"), equations.Num(l.direction.y)))
-	// yRight := equations.Add(equations.Num(other.start.y), equations.Mul(equations.Var("r"), equations.Num(other.direction.y)))
-	// secondEq := equations.NewEquation(yLeft, yRight)
+	yLeft := equations.Add(equations.Num(l.start.y), equations.Var(l.direction.y, "l"))
+	yRight := equations.Add(equations.Num(other.start.y), equations.Var(other.direction.y, "r"))
+	secondEq := equations.NewEquation(yLeft, yRight)
 
-	// lValue, _ := firstEq.SolveTo("l")
-	// rValue, _ := secondEq.Set("l", *lValue).SolveTo("r")
+	// fmt.Println("firstEq ", firstEq)
+	// fmt.Println("secondEq", secondEq)
 
-	// // TODO: check
+	lValue, _ := firstEq.SolveTo("l")
+	// fmt.Println("lValue ", lValue)
+	secondWithL := secondEq.Set("l", *lValue)
+	// fmt.Println("secondWithL ", secondWithL)
+	rValue, _ := secondWithL.SolveTo("r")
+	// fmt.Println("rValue", rValue)
 
-	return Point2d{}, nil
+	//p1 := l.Point(lValue.Number())
+	p2 := other.Point(rValue.Number())
+	// if p1 != p2 {
+	// 	return Point2d{}, errors.New("no intersection")
+	// }
+
+	return p2, nil
 }
 
 func (l Line2d) String() string {

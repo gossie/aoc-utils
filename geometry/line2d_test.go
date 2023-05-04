@@ -25,6 +25,10 @@ func TestContainsPoint_false(t *testing.T) {
 func TestIntersects_hasIntersection(t *testing.T) {
 	line1 := geometry.NewLine2d(geometry.NewPoint2d(1, 2), geometry.NewPoint2d(3, 3))
 	line2 := geometry.NewLine2d(geometry.NewPoint2d(0, 0), geometry.NewPoint2d(1, 1))
+	intersection, _ := line1.IntersectsAt(line2)
+	if intersection != geometry.NewPoint2d(3, 3) {
+		t.Fatalf("intersection should be at %v", geometry.NewPoint2d(3, 3))
+	}
 }
 
 func TestIntersects_noIntersection(t *testing.T) {

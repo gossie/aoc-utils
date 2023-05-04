@@ -85,10 +85,9 @@ func (e equation) SolveTo(varName string) (*value, error) {
 	left, _, leftComplementaryPath, errLeft := findValue(&e.left, varName)
 	right, rightPath, rightComplementaryPath, errRight := findValue(&e.right, varName)
 
-	fmt.Println(e)
-
 	if left != nil && right != nil {
 		eq := NewEquation(processPathElement(rightPath[len(rightPath)-1], e.left), processPathElement(rightPath[len(rightPath)-1], e.right))
+		fmt.Println(eq)
 		eq = eq.Optimize()
 		fmt.Println(eq)
 		return eq.SolveTo(varName)
@@ -174,6 +173,15 @@ type value struct {
 	name        string
 }
 
+func (v value) Number() float64 {
+	switch v.op {
+	default:
+		panic("value " + v.String() + " is not terminal")
+	case "num":
+		return v.number
+	}
+}
+
 func (v value) execute() value {
 	if v.left != nil && v.right != nil {
 		l := v.left.execute()
@@ -187,17 +195,19 @@ func (v value) execute() value {
 	var varName1, varName2 string
 
 	switch {
+	case bin(any(&val1), "-", anyNum(&number1))(&v):
+		v = Add(val1, Num(-number1)).execute()
+	case bin(any(&val1), "-", anyVariable(&number1, &varName1))(&v):
+		v = Add(val1, Var(-number1, varName1)).execute()
 	// Grundrechenarten
 	case bin(anyNum(&number1), "+", anyNum(&number2))(&v):
 		v = Num(v.left.number + v.right.number)
 	case bin(anyNum(&number1), "*", anyNum(&number2))(&v):
 		v = Num(v.left.number * v.right.number)
-	case bin(anyNum(&number1), "-", anyNum(&number2))(&v):
-		v = Num(v.left.number - v.right.number)
 	case bin(anyNum(&number1), "/", anyNum(&number2))(&v):
 		v = Num(v.left.number / v.right.number)
 	// Multiplikation mit 0 (kommutativ)
-	case bin(any(&val1), "*", num(0))(&v) || bin(num(0), "*", any(&val2))(&v):
+	case bin(any(&val1), "*", num(0))(&v) || bin(num(0), "*", any(&val2))(&v) || (anyVariable(&number1, &varName1)(&v) && number1 == 0.0):
 		v = Num(0)
 	// Multiplikation mit 1 (kommutativ), Division durch 1, Addition mit 0 (kommutativ) oder Subtraktion von 0
 	case bin(any(&val1), "*", num(1))(&v) || bin(num(1), "*", any(&val1))(&v) || bin(any(&val1), "/", num(1))(&v) || bin(any(&val1), "+", num(0))(&v) || bin(num(0), "+", any(&val1))(&v) || bin(any(&val1), "-", num(0))(&v):
@@ -208,29 +218,29 @@ func (v value) execute() value {
 		v = val1
 	// Rechnen mit Variable
 	case bin(anyVariable(&number1, &varName1), "/", anyNum(&number2))(&v):
-		v = Var(number1/number2, varName1)
+		v = Var(number1/number2, varName1).execute()
 	case bin(anyVariable(&number1, &varName1), "*", anyNum(&number2))(&v) || bin(anyNum(&number1), "*", anyVariable(&number2, &varName1))(&v):
-		v = Var(number1*number2, varName1)
+		v = Var(number1*number2, varName1).execute()
 	case bin(anyVariable(&number1, &varName1), "+", anyVariable(&number2, &varName2))(&v) && varName1 == varName2:
-		v = Var(number1+number2, varName1)
+		v = Var(number1+number2, varName1).execute()
 	case bin(anyVariable(&number1, &varName1), "-", anyVariable(&number2, &varName2))(&v) && varName1 == varName2:
-		v = Var(number1-number2, varName1)
+		v = Var(number1-number2, varName1).execute()
 	case bin(anyVariable(&number1, &varName1), "*", anyNum(&number2))(&v) || bin(anyNum(&number1), "*", anyVariable(&number2, &varName1))(&v):
-		v = Var(number1*number2, varName1)
+		v = Var(number1*number2, varName1).execute()
 	case bin(anyVariable(&number1, &varName1), "/", anyNum(&number2))(&v):
-		v = Var(number1/number2, varName1)
+		v = Var(number1/number2, varName1).execute()
 	// Distributivgesetze
 	case bin(bin(any(&val1), "+", any(&val2)), "*", anyNum(&number1))(&v) || bin(anyNum(&number1), "*", bin(any(&val1), "+", any(&val2)))(&v):
 		v = Add(Mul(Num(number1), val1), Mul(Num(number1), val2)).execute()
-	case bin(bin(any(&val1), "-", any(&val2)), "*", anyNum(&number1))(&v) || bin(anyNum(&number1), "*", bin(any(&val1), "-", any(&val2)))(&v):
-		v = Sub(Mul(Num(number1), val1), Mul(Num(number1), val2)).execute()
 	case bin(bin(any(&val1), "+", any(&val2)), "/", anyNum(&number1))(&v):
 		v = Add(Div(val1, Num(number1)), Div(val2, Num(number1))).execute()
-	case bin(bin(any(&val1), "-", any(&val2)), "/", anyNum(&number1))(&v):
-		v = Sub(Div(val1, Num(number1)), Div(val2, Num(number1))).execute()
 	// Assoziativgesetze? (varible wird bearbeitet)
-	case bin(bin(anyVariable(&number1, &varName1), "+", anyNum(&number2)), "-", anyVariable(&number3, &varName2))(&v):
-		v = Add(Var(number1-number3, varName1), Num(number2))
+	case bin(bin(anyVariable(&number1, &varName1), "+", anyNum(&number2)), "+", anyVariable(&number3, &varName2))(&v):
+		v = Add(Var(number1+number3, varName1), Num(number2)).execute()
+	case bin(bin(any(&val1), "+", anyNum(&number1)), "+", anyNum(&number2))(&v):
+		v = Add(val1, Num(number1+number2)).execute()
+	case bin(anyNum(&number1), "+", bin(any(&val1), "+", anyNum(&number2)))(&v):
+		v = Add(val1, Num(number1+number2)).execute()
 	}
 	return v
 }

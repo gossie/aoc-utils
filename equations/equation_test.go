@@ -35,8 +35,8 @@ func TestSolveToS(t *testing.T) {
 	original := equations.NewEquation(left, right)
 	s, _ := original.SolveTo("s")
 
-	if s.String() != "(4.000000r - 5.000000)" {
-		t.Fatalf("expected %v to be (4.000000r - 5.000000)", s)
+	if s.String() != "(4.000000r + -5.000000)" {
+		t.Fatalf("expected %v to be (4.000000r + -5.000000)", s)
 	}
 
 	if original.String() != "(4.000000r + (0.000000 * 7.000000)) = (1.000000s + (25.000000 / 5.000000))" {
@@ -45,7 +45,6 @@ func TestSolveToS(t *testing.T) {
 }
 
 func TestSolveTo_variableOnBothSides(t *testing.T) {
-	// 4x + (2 * 7) = 2x + (25 / 5) <=> 4x + 14 = 2x + 5 <=> 2x + 14 = 5 <=> 2x = -9 <=> x = -4.5
 	left := equations.Add(equations.Var(4, "x"), equations.Mul(equations.Num(2), equations.Num(7)))
 	right := equations.Add(equations.Var(2, "x"), equations.Div(equations.Num(25), equations.Num(5)))
 
@@ -149,8 +148,8 @@ func TestOptimize_8(t *testing.T) {
 	right := equations.Num(12.000000)
 
 	eq := equations.NewEquation(left, right).Optimize()
-	if eq.String() != "(2.000000r - 8.000000) = 12.000000" {
-		t.Fatalf("expected %v to be (2.000000r - 8.000000) = 12.000000", eq)
+	if eq.String() != "(2.000000r + -8.000000) = 12.000000" {
+		t.Fatalf("expected %v to be (2.000000r + -8.000000) = 12.000000", eq)
 	}
 }
 
@@ -159,7 +158,7 @@ func TestOptimize_9(t *testing.T) {
 	right := equations.Num(12.000000)
 
 	eq := equations.NewEquation(left, right).Optimize()
-	if eq.String() != "(2.000000r - 8.000000) = 12.000000" {
-		t.Fatalf("expected %v to be (2.000000r - 8.000000) = 12.000000", eq)
+	if eq.String() != "(2.000000r + -8.000000) = 12.000000" {
+		t.Fatalf("expected %v to be (2.000000r + -8.000000) = 12.000000", eq)
 	}
 }
