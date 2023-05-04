@@ -89,9 +89,6 @@ func (e equation) SolveTo(varName string) (*value, error) {
 
 	if left != nil && right != nil {
 		eq := NewEquation(processPathElement(rightPath[len(rightPath)-1], e.left), processPathElement(rightPath[len(rightPath)-1], e.right))
-		fmt.Println(eq)
-		eq = eq.Optimize()
-		fmt.Println(eq)
 		eq = eq.Optimize()
 		fmt.Println(eq)
 		return eq.SolveTo(varName)
@@ -109,15 +106,8 @@ func (e equation) SolveTo(varName string) (*value, error) {
 }
 
 func (e equation) Set(varName string, val value) equation {
-
-	// fmt.Println(val)
-	// fmt.Println(e)
 	newLeft := insert(e.left, varName, val)
-	// fmt.Println("newLeft:", newLeft)
-
 	newRight := insert(e.right, varName, val)
-	// fmt.Println("newRight:", newRight)
-
 	return NewEquation(newLeft, newRight)
 }
 
