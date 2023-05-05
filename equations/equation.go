@@ -3,7 +3,6 @@ package equations
 import (
 	"errors"
 	"fmt"
-	"reflect"
 )
 
 type BinaryOp func(value, value) value
@@ -100,9 +99,7 @@ func (eq equation) SolveTo(varName string) (*value, error) {
 
 	if left != nil && right != nil {
 		eq := NewEquation(processPathElement(rightPath[len(rightPath)-1], eq.left), processPathElement(rightPath[len(rightPath)-1], eq.right))
-		fmt.Println(eq)
 		eq = eq.Optimize()
-		fmt.Println(eq)
 		return eq.SolveTo(varName)
 	}
 
@@ -203,68 +200,13 @@ func (v value) execute() value {
 		v.right = &r
 	}
 
-	var val1, val2, val3 value
-	var number1, number2, number3 float64
-	var varName1, varName2 string
-
-	switch {
-	case bin(any(&val1), "-", anyNum(&number1))(&v):
-		v = Add(val1, Num(-number1)).execute()
-	case bin(any(&val1), "-", anyVariable(&number1, &varName1))(&v):
-		v = Add(val1, Var(-number1, varName1)).execute()
-	// Grundrechenarten
-	case bin(anyNum(&number1), "+", anyNum(&number2))(&v):
-		v = Num(v.left.number + v.right.number)
-	case bin(anyNum(&number1), "*", anyNum(&number2))(&v):
-		v = Num(v.left.number * v.right.number)
-	case bin(anyNum(&number1), "/", anyNum(&number2))(&v):
-		v = Num(v.left.number / v.right.number)
-	// Multiplikation mit 0 (kommutativ)
-	case bin(any(&val1), "*", num(0))(&v) || bin(num(0), "*", any(&val2))(&v) || (anyVariable(&number1, &varName1)(&v) && number1 == 0.0):
-		v = Num(0)
-	// Multiplikation mit 1 (kommutativ), Division durch 1, Addition mit 0 (kommutativ) oder Subtraktion von 0
-	case bin(any(&val1), "*", num(1))(&v) || bin(num(1), "*", any(&val1))(&v) || bin(any(&val1), "/", num(1))(&v) || bin(any(&val1), "+", num(0))(&v) || bin(num(0), "+", any(&val1))(&v) || bin(any(&val1), "-", num(0))(&v):
-		v = val1
-	case bin(bin(any(&val1), "+", any(&val2)), "-", any(&val3))(&v) && reflect.DeepEqual(val1, val3):
-		v = val2
-	case bin(bin(any(&val1), "+", any(&val2)), "-", any(&val3))(&v) && reflect.DeepEqual(val2, val3):
-		v = val1
-	// Rechnen mit Variable
-	case bin(anyVariable(&number1, &varName1), "/", anyNum(&number2))(&v):
-		v = Var(number1/number2, varName1).execute()
-	case bin(anyVariable(&number1, &varName1), "*", anyNum(&number2))(&v) || bin(anyNum(&number1), "*", anyVariable(&number2, &varName1))(&v):
-		v = Var(number1*number2, varName1).execute()
-	case bin(anyVariable(&number1, &varName1), "+", anyVariable(&number2, &varName2))(&v) && varName1 == varName2:
-		v = Var(number1+number2, varName1).execute()
-	case bin(anyVariable(&number1, &varName1), "-", anyVariable(&number2, &varName2))(&v) && varName1 == varName2:
-		v = Var(number1-number2, varName1).execute()
-	case bin(anyVariable(&number1, &varName1), "*", anyNum(&number2))(&v) || bin(anyNum(&number1), "*", anyVariable(&number2, &varName1))(&v):
-		v = Var(number1*number2, varName1).execute()
-	case bin(anyVariable(&number1, &varName1), "/", anyNum(&number2))(&v):
-		v = Var(number1/number2, varName1).execute()
-	// Distributivgesetze
-	case bin(bin(any(&val1), "+", any(&val2)), "*", anyNum(&number1))(&v) || bin(anyNum(&number1), "*", bin(any(&val1), "+", any(&val2)))(&v):
-		v = Add(Mul(Num(number1), val1), Mul(Num(number1), val2)).execute()
-	case bin(bin(any(&val1), "+", any(&val2)), "/", anyNum(&number1))(&v):
-		v = Add(Div(val1, Num(number1)), Div(val2, Num(number1))).execute()
-	// Assoziativgesetze? (varible wird bearbeitet)
-	case bin(bin(anyVariable(&number1, &varName1), "+", anyNum(&number2)), "+", anyVariable(&number3, &varName2))(&v):
-		v = Add(Var(number1+number3, varName1), Num(number2)).execute()
-	case bin(bin(any(&val1), "+", anyNum(&number1)), "+", anyNum(&number2))(&v):
-		v = Add(val1, Num(number1+number2)).execute()
-	case bin(bin(anyNum(&number1), "+", any(&val1)), "+", anyNum(&number2))(&v):
-		v = Add(Num(number1+number2), val1).execute()
-	case bin(bin(any(&val1), "+", anyVariable(&number1, &varName1)), "+", anyVariable(&number2, &varName2))(&v) && varName1 == varName2:
-		v = Add(val1, Var(number1+number2, varName1)).execute()
-	case bin(anyNum(&number1), "+", bin(any(&val1), "+", anyNum(&number2)))(&v):
-		v = Add(val1, Num(number1+number2)).execute()
-	case bin(anyNum(&number1), "+", bin(anyNum(&number2), "+", any(&val1)))(&v):
-		v = Add(val1, Num(number1+number2)).execute()
+	for _, pm := range Matchers {
+		if pm.Match(&v) {
+			return pm.Execute().execute()
+		}
 	}
 	return v
 }
-
-// ((1.500000 + 1.000000r) + -1.000000)
 
 func (v value) String() string {
 	switch v.op {
