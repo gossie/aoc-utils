@@ -6,7 +6,7 @@ import (
 	"github.com/gossie/aoc-utils/geometry"
 )
 
-func TestContainsPoint_true(t *testing.T) {
+func Test2dLineContainsPoint_true(t *testing.T) {
 	line := geometry.NewLine2d(geometry.NewPoint2d(1, 2), geometry.NewPoint2d(3, 3))
 	point := geometry.NewPoint2d(5, 4)
 	if !line.Contains(point) {
@@ -14,7 +14,7 @@ func TestContainsPoint_true(t *testing.T) {
 	}
 }
 
-func TestContainsPoint_false(t *testing.T) {
+func Test2dLineContainsPoint_false(t *testing.T) {
 	line := geometry.NewLine2d(geometry.NewPoint2d(1, 2), geometry.NewPoint2d(3, 3))
 	point := geometry.NewPoint2d(16, 5)
 	if line.Contains(point) {

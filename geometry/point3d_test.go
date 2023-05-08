@@ -15,6 +15,14 @@ func TestAddPoint3d(t *testing.T) {
 	}
 }
 
+func TestSubtractPoint3d(t *testing.T) {
+	p := geometry.NewPoint3d(7, 17, -3)
+	sum := p.Subtract(geometry.NewPoint3d(2, -7, 1))
+	if sum.X() != 5 || sum.Y() != 24 || sum.Z() != -4 {
+		t.Fatalf("%v != 5 or %v != 24 or %v != -4", sum.X(), sum.Y(), sum.Z())
+	}
+}
+
 func TestMultiplyPoint3d(t *testing.T) {
 	p := geometry.NewPoint3d(7, 17, -4)
 	product := p.Multiply(-2)

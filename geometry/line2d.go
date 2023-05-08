@@ -17,7 +17,18 @@ func NewLine2d(p1, p2 Point2d) Line2d {
 
 func (l Line2d) Contains(point Point2d) bool {
 	left := point.Subtract(l.start)
-	return left.x/l.direction.x == left.y/l.direction.y
+
+	r1 := 0.0
+	if l.direction.x != 0 {
+		r1 = left.x / l.direction.x
+	}
+	r2 := 0.0
+	if l.direction.y != 0 {
+		r2 = left.y / l.direction.y
+	}
+
+	return (r1 > 0 && ((r2 > 0 && r1 == r2) || r2 == 0)) || (r1 == 0 && left.x == 0) &&
+		(r2 > 0 && ((r1 > 0 && r2 == r1) || r1 == 0)) || (r2 == 0 && left.y == 0)
 }
 
 func (l Line2d) Point(factor float64) Point2d {

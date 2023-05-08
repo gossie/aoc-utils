@@ -87,7 +87,7 @@ func (e equation) IsTrue() bool {
 	return e.left.execute() == e.right.execute()
 }
 
-func (e equation) Optimize() equation {
+func (e equation) optimize() equation {
 	l := e.left.execute()
 	r := e.right.execute()
 	return NewEquation(l, r)
@@ -99,7 +99,7 @@ func (eq equation) SolveTo(varName string) (*value, error) {
 
 	if left != nil && right != nil {
 		eq := NewEquation(processPathElement(rightPath[len(rightPath)-1], eq.left), processPathElement(rightPath[len(rightPath)-1], eq.right))
-		eq = eq.Optimize()
+		eq = eq.optimize()
 		return eq.SolveTo(varName)
 	}
 

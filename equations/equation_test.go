@@ -1,27 +1,25 @@
-package equations_test
+package equations
 
 import (
 	"fmt"
 	"testing"
-
-	"github.com/gossie/aoc-utils/equations"
 )
 
 func TestOptimze(t *testing.T) {
-	left := equations.Add(equations.Var(4, "r"), equations.Mul(equations.Num(0), equations.Num(7)))
-	right := equations.Add(equations.Var(1, "s"), equations.Div(equations.Num(25), equations.Num(5)))
-	eq := equations.NewEquation(left, right)
+	left := Add(Var(4, "r"), Mul(Num(0), Num(7)))
+	right := Add(Var(1, "s"), Div(Num(25), Num(5)))
+	eq := NewEquation(left, right)
 
-	if eq.Optimize().String() != "4.000000r = (1.000000s + 5.000000)" {
+	if eq.optimize().String() != "4.000000r = (1.000000s + 5.000000)" {
 		t.Fatalf("expected %v to be 4.000000r = (1.000000s + 5.000000)", eq)
 	}
 }
 
 func TestSolveToR(t *testing.T) {
-	left := equations.Add(equations.Var(4, "r"), equations.Mul(equations.Num(0), equations.Num(7)))
-	right := equations.Add(equations.Var(1, "s"), equations.Div(equations.Num(25), equations.Num(5)))
+	left := Add(Var(4, "r"), Mul(Num(0), Num(7)))
+	right := Add(Var(1, "s"), Div(Num(25), Num(5)))
 
-	r, _ := equations.NewEquation(left, right).SolveTo("r")
+	r, _ := NewEquation(left, right).SolveTo("r")
 
 	if r.String() != "(0.250000s + 1.250000)" {
 		t.Fatalf("expected %v to be (0.250000s + 1.250000)", r)
@@ -29,10 +27,10 @@ func TestSolveToR(t *testing.T) {
 }
 
 func TestSolveToS(t *testing.T) {
-	left := equations.Add(equations.Var(4, "r"), equations.Mul(equations.Num(0), equations.Num(7)))
-	right := equations.Add(equations.Var(1, "s"), equations.Div(equations.Num(25), equations.Num(5)))
+	left := Add(Var(4, "r"), Mul(Num(0), Num(7)))
+	right := Add(Var(1, "s"), Div(Num(25), Num(5)))
 
-	original := equations.NewEquation(left, right)
+	original := NewEquation(left, right)
 	s, _ := original.SolveTo("s")
 
 	if s.String() != "(4.000000r + -5.000000)" {
@@ -45,10 +43,10 @@ func TestSolveToS(t *testing.T) {
 }
 
 func TestSolveTo_variableOnBothSides(t *testing.T) {
-	left := equations.Add(equations.Var(4, "x"), equations.Mul(equations.Num(2), equations.Num(7)))
-	right := equations.Add(equations.Var(2, "x"), equations.Div(equations.Num(25), equations.Num(5)))
+	left := Add(Var(4, "x"), Mul(Num(2), Num(7)))
+	right := Add(Var(2, "x"), Div(Num(25), Num(5)))
 
-	original := equations.NewEquation(left, right)
+	original := NewEquation(left, right)
 	s, _ := original.SolveTo("x")
 
 	if s.String() != fmt.Sprintf("%f", -9.0/2.0) {
@@ -57,107 +55,107 @@ func TestSolveTo_variableOnBothSides(t *testing.T) {
 }
 
 func TestSet(t *testing.T) {
-	left := equations.Add(equations.Var(4, "r"), equations.Mul(equations.Num(0), equations.Num(7)))
-	right := equations.Add(equations.Var(1, "s"), equations.Div(equations.Num(25), equations.Num(5)))
+	left := Add(Var(4, "r"), Mul(Num(0), Num(7)))
+	right := Add(Var(1, "s"), Div(Num(25), Num(5)))
 
-	r := equations.Div(equations.Add(equations.Var(1, "s"), equations.Num(5)), equations.Num(4))
+	r := Div(Add(Var(1, "s"), Num(5)), Num(4))
 
-	eq := equations.NewEquation(left, right).Set("r", r)
+	eq := NewEquation(left, right).Set("r", r)
 	if eq.String() != "((4.000000 * ((1.000000s + 5.000000) / 4.000000)) + (0.000000 * 7.000000)) = (1.000000s + (25.000000 / 5.000000))" {
 		t.Fatalf("expected %v to be ((4.000000 * ((1.000000s + 5.000000) / 4.000000)) + (0.000000 * 7.000000)) = (1.000000s + (25.000000 / 5.000000))", eq)
 	}
 
-	eq = eq.Optimize()
+	eq = eq.optimize()
 	if eq.String() != "(1.000000s + 5.000000) = (1.000000s + 5.000000)" {
 		t.Fatalf("expected %v to be (1.000000s + 5.000000) = (1.000000s + 5.000000)", eq)
 	}
 }
 
 func TestOptimize_1(t *testing.T) {
-	left := equations.Add(equations.Var(4, "r"), equations.Var(2, "r"))
-	right := equations.Num(12.000000)
+	left := Add(Var(4, "r"), Var(2, "r"))
+	right := Num(12.000000)
 
-	eq := equations.NewEquation(left, right).Optimize()
+	eq := NewEquation(left, right).optimize()
 	if eq.String() != "6.000000r = 12.000000" {
 		t.Fatalf("expected %v to be 6.000000r = 12.000000", eq)
 	}
 }
 
 func TestOptimize_2(t *testing.T) {
-	left := equations.Sub(equations.Var(4, "r"), equations.Var(2, "r"))
-	right := equations.Num(12.000000)
+	left := Sub(Var(4, "r"), Var(2, "r"))
+	right := Num(12.000000)
 
-	eq := equations.NewEquation(left, right).Optimize()
+	eq := NewEquation(left, right).optimize()
 	if eq.String() != "2.000000r = 12.000000" {
 		t.Fatalf("expected %v to be 2.000000r = 12.000000", eq)
 	}
 }
 
 func TestOptimize_3(t *testing.T) {
-	left := equations.Mul(equations.Var(4, "r"), equations.Num(2))
-	right := equations.Num(12.000000)
+	left := Mul(Var(4, "r"), Num(2))
+	right := Num(12.000000)
 
-	eq := equations.NewEquation(left, right).Optimize()
+	eq := NewEquation(left, right).optimize()
 	if eq.String() != "8.000000r = 12.000000" {
 		t.Fatalf("expected %v to be 8.000000r = 12.000000", eq)
 	}
 }
 
 func TestOptimize_4(t *testing.T) {
-	left := equations.Mul(equations.Num(2), equations.Var(4, "r"))
-	right := equations.Num(12.000000)
+	left := Mul(Num(2), Var(4, "r"))
+	right := Num(12.000000)
 
-	eq := equations.NewEquation(left, right).Optimize()
+	eq := NewEquation(left, right).optimize()
 	if eq.String() != "8.000000r = 12.000000" {
 		t.Fatalf("expected %v to be 8.000000r = 12.000000", eq)
 	}
 }
 
 func TestOptimize_5(t *testing.T) {
-	left := equations.Div(equations.Var(4, "r"), equations.Num(2))
-	right := equations.Num(12.000000)
+	left := Div(Var(4, "r"), Num(2))
+	right := Num(12.000000)
 
-	eq := equations.NewEquation(left, right).Optimize()
+	eq := NewEquation(left, right).optimize()
 	if eq.String() != "2.000000r = 12.000000" {
 		t.Fatalf("expected %v to be 2.000000r = 12.000000", eq)
 	}
 }
 
 func TestOptimize_6(t *testing.T) {
-	left := equations.Mul(equations.Var(4, "r"), equations.Num(1))
-	right := equations.Num(12.000000)
+	left := Mul(Var(4, "r"), Num(1))
+	right := Num(12.000000)
 
-	eq := equations.NewEquation(left, right).Optimize()
+	eq := NewEquation(left, right).optimize()
 	if eq.String() != "4.000000r = 12.000000" {
 		t.Fatalf("expected %v to be 4.000000r = 12.000000", eq)
 	}
 }
 
 func TestOptimize_7(t *testing.T) {
-	left := equations.Mul(equations.Num(1), equations.Var(4, "r"))
-	right := equations.Num(12.000000)
+	left := Mul(Num(1), Var(4, "r"))
+	right := Num(12.000000)
 
-	eq := equations.NewEquation(left, right).Optimize()
+	eq := NewEquation(left, right).optimize()
 	if eq.String() != "4.000000r = 12.000000" {
 		t.Fatalf("expected %v to be 4.000000r = 12.000000", eq)
 	}
 }
 
 func TestOptimize_8(t *testing.T) {
-	left := equations.Mul(equations.Num(2), equations.Sub(equations.Var(1, "r"), equations.Num(4)))
-	right := equations.Num(12.000000)
+	left := Mul(Num(2), Sub(Var(1, "r"), Num(4)))
+	right := Num(12.000000)
 
-	eq := equations.NewEquation(left, right).Optimize()
+	eq := NewEquation(left, right).optimize()
 	if eq.String() != "(2.000000r + -8.000000) = 12.000000" {
 		t.Fatalf("expected %v to be (2.000000r + -8.000000) = 12.000000", eq)
 	}
 }
 
 func TestOptimize_9(t *testing.T) {
-	left := equations.Mul(equations.Sub(equations.Var(1, "r"), equations.Num(4)), equations.Num(2))
-	right := equations.Num(12.000000)
+	left := Mul(Sub(Var(1, "r"), Num(4)), Num(2))
+	right := Num(12.000000)
 
-	eq := equations.NewEquation(left, right).Optimize()
+	eq := NewEquation(left, right).optimize()
 	if eq.String() != "(2.000000r + -8.000000) = 12.000000" {
 		t.Fatalf("expected %v to be (2.000000r + -8.000000) = 12.000000", eq)
 	}
