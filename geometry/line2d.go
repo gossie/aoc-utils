@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/gossie/aoc-utils/equations"
+	"github.com/gossie/equations"
 )
 
 type Line2d struct {
@@ -44,9 +44,9 @@ func (l Line2d) IntersectsAt(other Line2d) (Point2d, error) {
 	yRight := equations.Add(equations.Num(other.start.y), equations.Var(other.direction.y, "r"))
 	secondEq := equations.NewEquation(yLeft, yRight)
 
-	lValue, _ := firstEq.SolveTo("l")
-	secondWithL := secondEq.Set("l", *lValue)
-	rValue, err := secondWithL.SolveTo("r")
+	lValue, _ := equations.SolveTo(&firstEq, "l")
+	secondWithL := equations.Set(&secondEq, "l", *lValue)
+	rValue, err := equations.SolveTo(&secondWithL, "r")
 	if err != nil {
 		err, ok := err.(*equations.SolveError)
 		if ok {
