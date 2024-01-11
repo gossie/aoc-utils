@@ -25,11 +25,19 @@ type edge struct {
 	length   int
 }
 
-type path struct {
-	edges []edge
+type Path struct {
+	edges []*edge
 }
 
-func (p *path) TotalDistance() int {
+func (p *Path) lastNode() *Node {
+	if len(p.edges) == 0 {
+		return nil
+	}
+
+	return p.edges[len(p.edges)-1].to
+}
+
+func (p *Path) TotalDistance() int {
 	distance := 0
 	for _, e := range p.edges {
 		distance += e.length
@@ -37,7 +45,7 @@ func (p *path) TotalDistance() int {
 	return distance
 }
 
-type priorityQueue []path
+type priorityQueue []*Path
 
 func (pq priorityQueue) Len() int {
 	return len(pq)
@@ -52,7 +60,7 @@ func (pq priorityQueue) Swap(i, j int) {
 }
 
 func (pq *priorityQueue) Push(el any) {
-	n := el.(path)
+	n := el.(*Path)
 	*pq = append(*pq, n)
 }
 
@@ -63,11 +71,39 @@ func (pq *priorityQueue) Pop() any {
 	return el
 }
 
-func ShortestPath(data Node, from, to Node) []Node {
-	result := make([]Node, 0)
+func newPaths(currentPath *Path, visited map[*Node]int) []*Path {
+	paths := make([]*Path, 0)
+
+	currentEnd := currentPath.lastNode()
+	for _, e := range currentEnd.outgoing {
+		distance := currentPath.TotalDistance() + e.length
+		if currentShortestDistance, ok := visited[e.to]; !ok || currentShortestDistance > distance {
+			paths = append(paths, &Path{
+				edges: append(append(make([]*edge, 0, len(currentPath.edges)+1), currentPath.edges...), e),
+			})
+			visited[currentEnd] = distance
+		}
+	}
+
+	return paths
+}
+
+func ShortestPath(from, to *Node) *Path {
+	visited := make(map[*Node]int)
 
 	pq := make(priorityQueue, 0)
+	for _, e := range from.outgoing {
+		pq = append(pq, &Path{edges: []*edge{e}})
+	}
 	heap.Init(&pq)
 
-	return result
+	current := heap.Pop(&pq).(*Path)
+	for current.lastNode() != to {
+		for _, p := range newPaths(current, visited) {
+			heap.Push(&pq, p)
+		}
+		current = heap.Pop(&pq).(*Path)
+	}
+
+	return current
 }
