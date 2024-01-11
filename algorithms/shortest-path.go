@@ -10,7 +10,19 @@ func NewNode() *Node {
 	return &Node{}
 }
 
-func (n *Node) Add(other *Node, distance int) {
+func (n *Node) AddUndirectedEdge(other *Node, distance int) {
+	edge := edge{
+		from:   n,
+		to:     other,
+		length: distance,
+	}
+	n.outgoing = append(n.outgoing, &edge)
+	n.incomming = append(n.incomming, &edge)
+	other.incomming = append(other.incomming, &edge)
+	other.outgoing = append(other.outgoing, &edge)
+}
+
+func (n *Node) AddDirectedEdge(other *Node, distance int) {
 	edge := edge{
 		from:   n,
 		to:     other,
